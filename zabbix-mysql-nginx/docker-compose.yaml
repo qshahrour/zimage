@@ -1,0 +1,131 @@
+version: '3.8'
+services:
+  zabbix-server:
+    image: zabbix/zabbix-server-mysql:latest
+    container_name: zabbix-server
+    restart: "${RESTART_POLICY}"
+    ports:
+      - "${ZABBIX_SERVER_PORT}:10051"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA_DIRECTORY}/usr/lib/zabbix/alertscripts:/usr/lib/zabbix/alertscripts:ro
+      - ${DATA_DIRECTORY}/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:ro
+      - ${DATA_DIRECTORY}/var/lib/zabbix/dbscripts:/var/lib/zabbix/dbscripts:ro
+      - ${DATA_DIRECTORY}/var/lib/zabbix/export:/var/lib/zabbix/export:rw
+      - ${DATA_DIRECTORY}/var/lib/zabbix/modules:/var/lib/zabbix/modules:ro
+      - ${DATA_DIRECTORY}/var/lib/zabbix/enc:/var/lib/zabbix/enc:ro
+      - ${DATA_DIRECTORY}/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:ro
+      - ${DATA_DIRECTORY}/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:ro
+      - snmptraps:/var/lib/zabbix/snmptraps:ro
+    tmpfs: /tmp
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.70'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    env_file:
+      - ${ENV_VARS_DIRECTORY}/.env_srv
+    networks:
+      zbx_net_database:
+        aliases:
+          - zabbix-server
+      zbx_net_backend:
+        aliases:
+          - zabbix-server
+      zbx_net_frontend:
+    stop_grace_period: 30s
+    sysctls:
+      - net.ipv4.ip_local_port_range=1024 64999
+      - net.ipv4.conf.all.accept_redirects=0
+      - net.ipv4.conf.all.secure_redirects=0
+      - net.ipv4.conf.all.send_redirects=0
+    labels:
+      com.zabbix.company: "Zabbix LLC"
+      com.zabbix.component: "zabbix-server" 
+
+  web-nginx:
+    image: zabbix/zabbix-web-nginx-mysql:latest
+    container_name: zabbix-web
+    ports:
+      - "${ZABBIX_WEB_NGINX_HTTP_PORT}:8080"
+      - "${ZABBIX_WEB_NGINX_HTTPS_PORT}:8443"
+    restart: "${RESTART_POLICY}"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ${DATA_DIRECTORY}/etc/ssl/nginx:/etc/ssl/nginx:ro
+      - ${DATA_DIRECTORY}/usr/share/zabbix/modules/:/usr/share/zabbix/modules/:ro
+    tmpfs: /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: '0.70'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    env_file:
+      - ${ENV_VARS_DIRECTORY}/.env_web
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      zbx_net_database:
+      zbx_net_backend:
+      zbx_net_frontend:
+    stop_grace_period: 10s
+    sysctls:
+      - net.core.somaxconn=65535
+    labels:
+      com.zabbix.company: "Zabbix LLC"
+      com.zabbix.component: "zabbix-frontend"
+      com.zabbix.webserver: "nginx"
+
+
+  mysql-server:
+    image: "${MYSQL_IMAGE}:${MYSQL_IMAGE_TAG}"
+    container_name: mysql-server
+    command:
+      - mysqld
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_bin
+      - --log_bin_trust_function_creators=1
+    restart: "${RESTART_POLICY}"
+    volumes:
+      - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
+      - ${ENV_VARS_DIRECTORY}/mysql_init/init_proxy_db.sql:/docker-entrypoint-initdb.d/mysql_init_proxy.sql:ro
+    env_file:
+      - ${ENV_VARS_DIRECTORY}/.env_db_mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/MYSQL_ROOT_PASSWORD
+    secrets:
+      - MYSQL_USER
+      - MYSQL_PASSWORD
+      - MYSQL_ROOT_PASSWORD
+    stop_grace_period: 1m
+    networks:
+      zbx_net_database:
+        aliases:
+          - zabbix-server-mysql
+    labels:
+      com.zabbix.description: "Zabbix server with MySQL database support"
+      com.zabbix.dbtype: "mysql"
+
+
+  db-data-mysql:
+    image: busybox
+    volumes:
+      - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
+
+
+  
