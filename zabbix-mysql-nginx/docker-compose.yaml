@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   zabbix-server:
-    image: zabbix/zabbix-server-mysql:latest
+    image: "${ZABBIX_SERVER_MYSQL_IMAGE}:${ZABBIX_UBUNTU_IMAGE_TAG}${ZABBIX_IMAGE_TAG_POSTFIX}"
     container_name: zabbix-server
     restart: "${RESTART_POLICY}"
     ports:
@@ -122,10 +122,10 @@ services:
       com.zabbix.dbtype: "mysql"
 
 
-  db-data-mysql:
-    image: busybox
-    volumes:
-      - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
+  #db-data-mysql:
+  #  image: busybox
+  #  volumes:
+  #    - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
 
 
   

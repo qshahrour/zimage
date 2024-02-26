@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =================
 
-REPO_DIR="$1"
+REPO_PATH="$1"
 VERSION="$2"
 debDate="$( date --rfc-2822 )"
 # shellcheck disable=SC2276
@@ -11,15 +11,15 @@ debDate="$( date --rfc-2822 )"
 
 
 
-if [ -z "${REPO_DIR}" ] || [ -z "${VERSION}" ]; then
+if [ -z "${REPO_PATH}" ] || [ -z "${VERSION}" ]; then
  # shellcheck disable=SC2016
- echo 'usage: ./gen-deb-ver.sh ${REPO_DIR} ${VERSION}'
+ echo 'usage: ./gen-deb-ver.sh ${REPO_PATH} ${VERSION}'
  exit 1
 fi
 
 
 # shellcheck disable=SC1017
-GIT_COMMAND="git -C ${REPO_DIR}"
+GIT_COMMAND="git -C ${REPO_PATH}"
 origVersion="${VERSION}"
 debVersion="${VERSION#v}"
 
