@@ -134,7 +134,10 @@ networks:
       driver: "${DATABASE_NETWORK_DRIVER}"
 
 volumes:
+  mysql-db-volume:
+  zabbix-server-data:
   snmptraps:
+
 #  dbsocket:
 
 secrets:
