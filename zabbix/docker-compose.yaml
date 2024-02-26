@@ -126,6 +126,8 @@ services:
   #  image: busybox
   #  volumes:
   #    - ${DATA_DIRECTORY}/var/lib/mysql:/var/lib/mysql:rw
-
+volumes:
+  mysql-db-volume:
+  zabbix-server-data:
 
   
