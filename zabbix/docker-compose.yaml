@@ -16,7 +16,6 @@ services:
       - ${DATA_DIRECTORY}/var/lib/zabbix/enc:/var/lib/zabbix/enc:ro
       - ${DATA_DIRECTORY}/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:ro
       - ${DATA_DIRECTORY}/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:ro
-      - snmptraps:/var/lib/zabbix/snmptraps:ro
     tmpfs: /tmp
     ulimits:
       nproc: 65535
