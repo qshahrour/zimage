@@ -33,9 +33,6 @@ services:
     env_file:
       - ${ENV_VARS_DIRECTORY}/.env_srv
     networks:
-      zbx_net_database:
-        aliases:
-          - zabbix-server
       zbx_net_backend:
         aliases:
           - zabbix-server
