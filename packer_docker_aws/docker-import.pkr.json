@@ -1,0 +1,16 @@
+{
+  "type": "docker-import",
+  "repository": "local/ubuntu22.04",
+  "tag": "latest",
+  "changes": [
+    "USER www-data",
+    "WORKDIR /var/www",
+    "ENV HOSTNAME zabbix.ingotbrokers.com",
+    "VOLUME /test1 /test2",
+    "EXPOSE 80 443",
+    "LABEL version=22.04",
+    "ONBUILD RUN date",
+    "CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+    "ENTRYPOINT /var/www/start.sh"
+  ]
+}

@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - aws --version
+      - echo "Logging in to Amazon ECR..."
+      - $( aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION )
+  build:
+    commands:
+       echo "Building and packaging..."  - 
+
+  artifacts:
+    files:
+      - build/**/*
+    discard-paths: yes
+    base-directory: build
+
+cache:
+  paths:
+    - vendor/**/*

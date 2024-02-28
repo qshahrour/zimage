@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -o pipefail
-
 set +e
 
 # Script trace mode
@@ -31,54 +30,54 @@ NGINX_CONF_FILE="/etc/nginx/nginx.conf"
 #    (will allow for "$MYSQL_PASSWORD_FILE" to fill in the value of "$MYSQL_PASSWORD" from a file)
 # unsets the VAR_FILE afterwards and just leaving VAR
 file_env() {
-    local var="$1"
-    local fileVar="${var}_FILE"
-    local defaultValue="${2:-}"
+  local var="$1"
+  local fileVar="${var}_FILE"
+  local defaultValue="${2:-}"
 
-    if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
-        echo "**** Both variables $var and $fileVar are set (but are exclusive)"
-        exit 1
-    fi
+  if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
+	echo "**** Both variables $var and $fileVar are set (but are exclusive)"
+	exit 1
+  fi
 
-    local val="$defaultValue"
+  local val="$defaultValue"
 
-    if [ "${!var:-}" ]; then
-        val="${!var}"
-        echo "** Using ${var} variable from ENV"
-    elif [ "${!fileVar:-}" ]; then
-        if [ ! -f "${!fileVar}" ]; then
-            echo "**** Secret file \"${!fileVar}\" is not found"
-            exit 1
-        fi
-        val="$(< "${!fileVar}")"
-        echo "** Using ${var} variable from secret file"
-    fi
-    export "$var"="$val"
-    unset "$fileVar"
+  if [ "${!var:-}" ]; then
+	val="${!var}"
+	echo "** Using ${var} variable from ENV"
+  elif [ "${!fileVar:-}" ]; then
+	if [ ! -f "${!fileVar}" ]; then
+		echo "**** Secret file \"${!fileVar}\" is not found"
+		exit 1
+	fi
+	val="$(< "${!fileVar}")"
+	echo "** Using ${var} variable from secret file"
+  fi
+  export "$var"="$val"
+  unset "$fileVar"
 }
 
 # Check prerequisites for MySQL database
 check_variables() {
-    if [ ! -n "${DB_SERVER_SOCKET}" ]; then
-        : ${DB_SERVER_HOST:="mysql-server"}
-    else
-        DB_SERVER_HOST="localhost"
-    fi
-    : ${DB_SERVER_PORT:="3306"}
+  if [ ! -n "${DB_SERVER_SOCKET}" ]; then
+	: ${DB_SERVER_HOST:="mysql-server"}
+  else
+	DB_SERVER_HOST="localhost"
+  fi
+  : ${DB_SERVER_PORT:="3306"}
 
-    file_env MYSQL_USER
-    file_env MYSQL_PASSWORD
+  file_env MYSQL_USER
+  file_env MYSQL_PASSWORD
 
-    DB_SERVER_ZBX_USER=${MYSQL_USER:-"zabbix"}
-    DB_SERVER_ZBX_PASS=${MYSQL_PASSWORD:-"zabbix"}
+  DB_SERVER_ZBX_USER=${MYSQL_USER:-"zabbix"}
+  DB_SERVER_ZBX_PASS=${MYSQL_PASSWORD:-"zabbix"}
 
-    DB_SERVER_DBNAME=${MYSQL_DATABASE:-"zabbix"}
+  DB_SERVER_DBNAME=${MYSQL_DATABASE:-"zabbix"}
 
-    if [ ! -n "${DB_SERVER_SOCKET}" ]; then
-        mysql_connect_args="-h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT}"
-    else
-        mysql_connect_args="-S ${DB_SERVER_SOCKET}"
-    fi
+  if [ ! -n "${DB_SERVER_SOCKET}" ]; then
+	mysql_connect_args="-h ${DB_SERVER_HOST} -P ${DB_SERVER_PORT}"
+  else
+	mysql_connect_args="-S ${DB_SERVER_SOCKET}"
+  fi
 }
 
 db_tls_params() {

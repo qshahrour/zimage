@@ -1,0 +1,15 @@
+source "docker" "example" {
+    image = "ubuntu:18.04"
+    export_path = "party_parrot.tar"
+}
+
+build {
+  sources = [
+    "source.docker.example"
+  ]
+
+  post-processor "docker-import" {
+    repository = "local/ubuntu"
+    tag = "latest"
+  }
+}

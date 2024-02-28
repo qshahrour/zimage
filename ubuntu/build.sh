@@ -23,7 +23,7 @@ if [[ ! $VERSION =~ ^[0-9]*\.[0-9]*\.[0-9]*$ ]] && [ "$VERSION" != "latest" ]; t
 fi
 ####################################
 if [ "$VERSION" != "latest" ]; then
-    VCS_REF=$(git ls-remote https://git.zabbix.com/scm/zbx/zabbix.git refs/tags/"$VERSION" | cut -c1-10)
+    VCS_REF=$( git ls-remote https://git.zabbix.com/scm/zbx/zabbix.git refs/tags/"$VERSION" | cut -c1-10 )
 else
     MAJOR_VERSION=$(grep "ARG MAJOR_VERSION" Dockerfile | head -n1 | cut -f2 -d"=")
     MINOR_VERSION=$(grep "ARG ZBX_VERSION" Dockerfile | head -n1 | cut -f2 -d".")
